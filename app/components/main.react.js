@@ -1,11 +1,11 @@
 import React from 'react';
-import Stock from './stock.react';
+import StockChart from './stock-chart.react';
 
 export default class Main extends React.Component {
 
     render(){
         return (
-            <Stock/>
+            <StockChart/>
         ); 
     }
     
