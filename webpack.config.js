@@ -2,7 +2,7 @@ module.exports = {
     entry:'./app/app.js',
     output:{
         path: __dirname + '/build',
-        filename: 'app.js'
+        filename: '[hash].app.js'
     },
     module: {
         loaders: [
@@ -14,5 +14,11 @@ module.exports = {
                 }
             }
         ]
+    },
+    devServer: {
+        inline: true,
+        contentBase: './build',
+        host: 'localhost',
+        port: 3000
     }
 };
