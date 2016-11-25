@@ -1,32 +1,94 @@
 import React from 'react';
-import Highstock from 'react-highstock';
+import Highstock from 'highstock-release';
+
+import StockAPI from '../api/stock-api';
+import StockActions from "../actions/stock-actions";
+import StockStore from '../stores/stock-store';
 
 export default class StockChart extends React.Component {
 
     constructor(props){
         super(props);
-        this.config = {
+        let period = StockStore.getPeriod();
+
+        this.state = {
+            period : period,
+            data   : StockStore.getData(this.props.name,period)
+        };
+
+        this.onChangeData = this.onChangeData.bind(this);
+    }
+
+    componentWillMount(){
+        StockAPI.fetchData[StockStore.getPeriod()](this.props.name);
+        StockStore.on('changeData',() => {
+            if (StockStore.getName() === this.props.name) {
+                this.onChangeData();
+            }
+        });
+        StockStore.on('changePeriod',() => {
+            if (StockStore.getName() === this.props.name) {
+                StockAPI.fetchData[StockStore.getPeriod()](this.props.name);
+            }
+        });
+    }
+
+    renderChart(){
+        this.chart = new Highstock.stockChart({
+
+            chart: {
+                renderTo: this.refs.chart,
+                borderColor: '#C0C0C0',
+                borderWidth: 1,
+                borderRadius: 0
+            },
+
+            navigation: {
+                buttonOptions: {
+                    enabled: false
+                }
+            },
+
             rangeSelector: {
-                selected: 1
+                enabled: false
             },
 
             title: {
-                text: `${this.state.name} Stock`
+                text: `${this.props.name} Stocks`
             },
 
             series: [{
-                name: this.state.name,
+                name: this.props.name,
                 data: this.state.data,
                 tooltip: {
                     valueDecimals: 2
                 }
             }]
-        }
+            
+        });
+    }
+
+    changePeriod(period){
+        StockActions.receiveStockPeriod(this.props.name,period)
+    }
+
+    onChangeData(){
+        let period = StockStore.getPeriod();
+        let data   = StockStore.getData(this.props.name,period);
+
+        this.setState({ data, period },() => this.renderChart());
     }
 
     render(){
         return (
-            <Highstock config = {config}></Highstock>
+            <div>
+                <div>
+                    <button onClick={() => this.changePeriod("day")}> Day </button>
+                    <button onClick={() => this.changePeriod("month")}> Month </button>
+                    <button onClick={() => this.changePeriod("year")}> Year </button>
+                </div>
+                <div className="chart" ref="chart"></div>
+            </div>
         )
     }
 
