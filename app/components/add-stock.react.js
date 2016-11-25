@@ -26,12 +26,17 @@ export default class AddStock extends React.Component {
 
     render(){
         return (
-            <div>
-                <input type="text" placeholder="Stock code" name="stock-name"
-                       value={this.state.inputValue}
-                       onChange={this.updateInput}/>
-                <button className="btn btn-default"
-                        onClick={this.handleClick}>Add stock</button>
+            <div className="row">
+                <br/>
+                <div className="col-md-10">
+                    <input type="text" placeholder="Stock code" name="stock-name" className="form-control input-lg"
+                           value={this.state.inputValue}
+                           onChange={this.updateInput}/>
+                </div>
+                <div className="col-md-2 text-right">
+                    <button className="btn btn-primary btn-lg" type="button"
+                            onClick={this.handleClick}>Add stock chart</button>
+                </div>
             </div>
         );
     }

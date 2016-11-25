@@ -82,12 +82,20 @@ export default class StockChart extends React.Component {
     render(){
         return (
             <div>
-                <div>
-                    <button onClick={() => this.changePeriod("day")}> Day </button>
-                    <button onClick={() => this.changePeriod("month")}> Month </button>
-                    <button onClick={() => this.changePeriod("year")}> Year </button>
+                <div className="btn-group">
+                    <button type="button"
+                            className={"btn " + ( this.state.period === "day"   ? "btn-primary" : "btn-default")}
+                            onClick={() => this.changePeriod("day")}> Day </button>
+                    <button type="button"
+                            className={"btn " + ( this.state.period === "month" ? "btn-primary" : "btn-default")}
+                            onClick={() => this.changePeriod("month")}> Month </button>
+                    <button type="button"
+                            className={"btn " + ( this.state.period === "year"  ? "btn-primary" : "btn-default")}
+                            onClick={() => this.changePeriod("year")}> Year </button>
                 </div>
-                <div className="chart" ref="chart"></div>
+                    <br/><br/>
+                <div className="chart " ref="chart"></div>
+                    <br/>
             </div>
         )
     }
