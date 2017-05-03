@@ -8,19 +8,29 @@ import {EventEmitter} from "events";
 
 let _stocks = {},
     _currentName = null,
+    _currentDatatype = "none",
     _currentPeriod = "year";
 
 function _parseFromYQL(action){
-    _stocks[_currentName][_currentPeriod] = action.data.map(item => {
-        let timestamp = parseInt(moment(item.Date,"YYYY-MM-DD").format('x'),10);
-        return [ timestamp, +item.Close ];
+    ['Close','Low','High'].forEach(dataType => {
+        _stocks[_currentName][_currentPeriod][_getDataType(dataType)] = action.data.map(item => {
+            let timestamp = parseInt(moment(item.Date,"YYYY-MM-DD").format('x'),10);
+            return [ timestamp, +item[dataType] ];
+        }).sort(_sortDataByDate);
     });
 }
 
 function _parseFromChartAPI(action){
-    _stocks[_currentName][_currentPeriod] = action.data.map(item => {
-        return [ item.Timestamp * 1000, +item.close ];
+    ['close','low','high'].forEach(dataType => {
+        _stocks[_currentName][_currentPeriod][_getDataType(dataType)] = action.data.map(item => {
+            return [ item.Timestamp * 1000, +item[dataType] ];
+        }).sort(_sortDataByDate);
     });
+}
+
+function _getDataType(dataType){
+    dataType = dataType.toLowerCase();
+    return dataType === "close" ? "none" : dataType;
 }
 
 function _sortDataByDate(a,b){
@@ -47,15 +57,15 @@ class StockStore extends EventEmitter{
                     }
 
                     if (!_stocks[_currentName][_currentPeriod]) {
+                        _stocks[_currentName][_currentPeriod] = {};
+                    }
 
+                    if (!Object.keys(_stocks[_currentName][_currentPeriod]).length) {
                         if (_currentPeriod === "month" || _currentPeriod === "year") {
                             _parseFromYQL(action);
                         } else {
                             _parseFromChartAPI(action);
                         }
-
-                        _stocks[_currentName][_currentPeriod] = _stocks[_currentName][_currentPeriod]
-                            .sort(_sortDataByDate);
                     }
 
                     this.emit("changeData");
@@ -68,24 +78,36 @@ class StockStore extends EventEmitter{
                     ({ name:_currentName, period:_currentPeriod } = action.data);
                     this.emit("changePeriod");
                     break;
+                case ActionTypes.RECEIVE_STOCK_DATATYPE:
+                    ({ name:_currentName, datatype:_currentDatatype } = action.data);
+                    this.emit("changeData");
+                    break;
             }
         });
     }
 
-    getData(name,period){
+    getData(name, period, datatype) {
         if (!_stocks[name]) {
              _stocks[name] = {};
         }
 
-        return _stocks[name][period];
+        if (!_stocks[name][period]) {
+            _stocks[name][period] = {};
+        }
+
+        return _stocks[name][period][datatype];
     }
 
-    getName(){
+    getName() {
         return _currentName;
     }
 
-    getPeriod(){
+    getPeriod() {
         return _currentPeriod;
+    }
+
+    getDatatype() {
+        return _currentDatatype;
     }
 }
 

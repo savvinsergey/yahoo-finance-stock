@@ -14,10 +14,16 @@ export default {
             name
         })
     },
-    receiveStockPeriod(name,period) {
+    receiveStockPeriod(name, period) {
         AppDispatcher.dispatch({
             actionType: ActionTypes.RECEIVE_STOCK_PERIOD,
             data: { name, period }
+        })
+    },
+    receiveStockDataType(name, datatype) {
+        AppDispatcher.dispatch({
+            actionType: ActionTypes.RECEIVE_STOCK_DATATYPE,
+            data: { name, datatype }
         })
     }
 };

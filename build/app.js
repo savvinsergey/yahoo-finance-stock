@@ -21995,6 +21995,17 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	function _getColor(dataType) {
+	    switch (dataType) {
+	        case "none":
+	            return "#286090";
+	        case "low":
+	            return "#BF0B23";
+	        case "high":
+	            return "#1ABF0B";
+	    }
+	}
+
 	var StockChart = function (_React$Component) {
 	    _inherits(StockChart, _React$Component);
 
@@ -22004,13 +22015,16 @@
 	        var _this = _possibleConstructorReturn(this, (StockChart.__proto__ || Object.getPrototypeOf(StockChart)).call(this, props));
 
 	        var period = _stockStore2.default.getPeriod();
+	        var datatype = _stockStore2.default.getDatatype();
 
 	        _this.state = {
 	            period: period,
-	            data: _stockStore2.default.getData(_this.props.name, period)
+	            datatype: datatype,
+	            data: _stockStore2.default.getData(_this.props.name, period, datatype)
 	        };
 
-	        _this.onChangeData = _this.onChangeData.bind(_this);
+	        _this.changePeriod = _this.changePeriod.bind(_this);
+	        _this.changeDataType = _this.changeDataType.bind(_this);
 	        return _this;
 	    }
 
@@ -22060,6 +22074,7 @@
 	                series: [{
 	                    name: this.props.name,
 	                    data: this.state.data,
+	                    color: _getColor(this.state.datatype),
 	                    tooltip: {
 	                        valueDecimals: 2
 	                    }
@@ -22073,14 +22088,20 @@
 	            _stockActions2.default.receiveStockPeriod(this.props.name, period);
 	        }
 	    }, {
+	        key: 'changeDataType',
+	        value: function changeDataType(e) {
+	            _stockActions2.default.receiveStockDataType(this.props.name, e.target.value);
+	        }
+	    }, {
 	        key: 'onChangeData',
 	        value: function onChangeData() {
 	            var _this3 = this;
 
 	            var period = _stockStore2.default.getPeriod();
-	            var data = _stockStore2.default.getData(this.props.name, period);
+	            var datatype = _stockStore2.default.getDatatype();
+	            var data = _stockStore2.default.getData(this.props.name, period, datatype);
 
-	            this.setState({ data: data, period: period }, function () {
+	            this.setState({ data: data, period: period, datatype: datatype }, function () {
 	                return _this3.renderChart();
 	            });
 	        }
@@ -22094,36 +22115,83 @@
 	                null,
 	                _react2.default.createElement(
 	                    'div',
-	                    { className: 'btn-group' },
+	                    { className: 'row' },
 	                    _react2.default.createElement(
-	                        'button',
-	                        { type: 'button', className: "btn " + (this.state.period === "day" ? "btn-primary" : "btn-default"),
-	                            onClick: function onClick() {
-	                                return _this4.changePeriod("day");
-	                            } },
-	                        ' Day '
+	                        'div',
+	                        { className: 'col-md-10' },
+	                        _react2.default.createElement(
+	                            'label',
+	                            { className: 'center-block' },
+	                            'Period: '
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'btn-group' },
+	                            _react2.default.createElement(
+	                                'button',
+	                                { type: 'button',
+	                                    className: "btn " + (this.state.period === "day" ? "btn-primary" : "btn-default"),
+	                                    onClick: function onClick() {
+	                                        return _this4.changePeriod("day");
+	                                    } },
+	                                ' Day '
+	                            ),
+	                            _react2.default.createElement(
+	                                'button',
+	                                { type: 'button',
+	                                    className: "btn " + (this.state.period === "month" ? "btn-primary" : "btn-default"),
+	                                    onClick: function onClick() {
+	                                        return _this4.changePeriod("month");
+	                                    } },
+	                                ' Month '
+	                            ),
+	                            _react2.default.createElement(
+	                                'button',
+	                                { type: 'button',
+	                                    className: "btn " + (this.state.period === "year" ? "btn-primary" : "btn-default"),
+	                                    onClick: function onClick() {
+	                                        return _this4.changePeriod("year");
+	                                    } },
+	                                ' Year '
+	                            )
+	                        )
 	                    ),
 	                    _react2.default.createElement(
-	                        'button',
-	                        { type: 'button', className: "btn " + (this.state.period === "month" ? "btn-primary" : "btn-default"),
-	                            onClick: function onClick() {
-	                                return _this4.changePeriod("month");
-	                            } },
-	                        ' Month '
-	                    ),
-	                    _react2.default.createElement(
-	                        'button',
-	                        { type: 'button', className: "btn " + (this.state.period === "year" ? "btn-primary" : "btn-default"),
-	                            onClick: function onClick() {
-	                                return _this4.changePeriod("year");
-	                            } },
-	                        ' Year '
+	                        'div',
+	                        { className: 'col-md-2' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'form-group' },
+	                            _react2.default.createElement(
+	                                'label',
+	                                null,
+	                                'Type of values: '
+	                            ),
+	                            _react2.default.createElement(
+	                                'select',
+	                                { className: 'form-control', onChange: this.changeDataType },
+	                                _react2.default.createElement(
+	                                    'option',
+	                                    { value: 'none' },
+	                                    'none'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'option',
+	                                    { value: 'low' },
+	                                    'low'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'option',
+	                                    { value: 'high' },
+	                                    'high'
+	                                )
+	                            )
+	                        )
 	                    )
 	                ),
-	                _react2.default.createElement('br', null),
-	                _react2.default.createElement('br', null),
 	                _react2.default.createElement('div', { className: 'chart ', ref: 'chart' }),
-	                _react2.default.createElement('br', null)
+	                _react2.default.createElement('br', null),
+	                _react2.default.createElement('hr', null)
 	            );
 	        }
 	    }]);
@@ -28699,6 +28767,12 @@
 	            actionType: _stockConstants.ActionTypes.RECEIVE_STOCK_PERIOD,
 	            data: { name: name, period: period }
 	        });
+	    },
+	    receiveStockDataType: function receiveStockDataType(name, datatype) {
+	        _appDispatcher2.default.dispatch({
+	            actionType: _stockConstants.ActionTypes.RECEIVE_STOCK_DATATYPE,
+	            data: { name: name, datatype: datatype }
+	        });
 	    }
 	};
 
@@ -28985,7 +29059,8 @@
 	var ActionTypes = exports.ActionTypes = {
 	    RECEIVE_STOCK_DATA: 'RECEIVE_STOCK_DATA',
 	    RECEIVE_STOCK_NAME: 'RECEIVE_STOCK_NAME',
-	    RECEIVE_STOCK_PERIOD: 'RECEIVE_STOCK_PERIOD'
+	    RECEIVE_STOCK_PERIOD: 'RECEIVE_STOCK_PERIOD',
+	    RECEIVE_STOCK_DATATYPE: 'RECEIVE_STOCK_DATATYPE'
 	};
 
 /***/ },
@@ -29024,19 +29099,29 @@
 
 	var _stocks = {},
 	    _currentName = null,
+	    _currentDatatype = "none",
 	    _currentPeriod = "year";
 
 	function _parseFromYQL(action) {
-	    _stocks[_currentName][_currentPeriod] = action.data.map(function (item) {
-	        var timestamp = parseInt((0, _moment2.default)(item.Date, "YYYY-MM-DD").format('x'), 10);
-	        return [timestamp, +item.Close];
+	    ['Close', 'Low', 'High'].forEach(function (dataType) {
+	        _stocks[_currentName][_currentPeriod][_getDataType(dataType)] = action.data.map(function (item) {
+	            var timestamp = parseInt((0, _moment2.default)(item.Date, "YYYY-MM-DD").format('x'), 10);
+	            return [timestamp, +item[dataType]];
+	        }).sort(_sortDataByDate);
 	    });
 	}
 
 	function _parseFromChartAPI(action) {
-	    _stocks[_currentName][_currentPeriod] = action.data.map(function (item) {
-	        return [item.Timestamp * 1000, +item.close];
+	    ['close', 'low', 'high'].forEach(function (dataType) {
+	        _stocks[_currentName][_currentPeriod][_getDataType(dataType)] = action.data.map(function (item) {
+	            return [item.Timestamp * 1000, +item[dataType]];
+	        }).sort(_sortDataByDate);
 	    });
+	}
+
+	function _getDataType(dataType) {
+	    dataType = dataType.toLowerCase();
+	    return dataType === "close" ? "none" : dataType;
 	}
 
 	function _sortDataByDate(a, b) {
@@ -29067,14 +29152,15 @@
 	                    }
 
 	                    if (!_stocks[_currentName][_currentPeriod]) {
+	                        _stocks[_currentName][_currentPeriod] = {};
+	                    }
 
+	                    if (!Object.keys(_stocks[_currentName][_currentPeriod]).length) {
 	                        if (_currentPeriod === "month" || _currentPeriod === "year") {
 	                            _parseFromYQL(action);
 	                        } else {
 	                            _parseFromChartAPI(action);
 	                        }
-
-	                        _stocks[_currentName][_currentPeriod] = _stocks[_currentName][_currentPeriod].sort(_sortDataByDate);
 	                    }
 
 	                    _this.emit("changeData");
@@ -29090,6 +29176,13 @@
 
 	                    _this.emit("changePeriod");
 	                    break;
+	                case _stockConstants.ActionTypes.RECEIVE_STOCK_DATATYPE:
+	                    var _action$data2 = action.data;
+	                    _currentName = _action$data2.name;
+	                    _currentDatatype = _action$data2.datatype;
+
+	                    _this.emit("changeData");
+	                    break;
 	            }
 	        });
 	        return _this;
@@ -29097,12 +29190,16 @@
 
 	    _createClass(StockStore, [{
 	        key: "getData",
-	        value: function getData(name, period) {
+	        value: function getData(name, period, datatype) {
 	            if (!_stocks[name]) {
 	                _stocks[name] = {};
 	            }
 
-	            return _stocks[name][period];
+	            if (!_stocks[name][period]) {
+	                _stocks[name][period] = {};
+	            }
+
+	            return _stocks[name][period][datatype];
 	        }
 	    }, {
 	        key: "getName",
@@ -29113,6 +29210,11 @@
 	        key: "getPeriod",
 	        value: function getPeriod() {
 	            return _currentPeriod;
+	        }
+	    }, {
+	        key: "getDatatype",
+	        value: function getDatatype() {
+	            return _currentDatatype;
 	        }
 	    }]);
 
@@ -29496,18 +29598,18 @@
 	                _react2.default.createElement(
 	                    "div",
 	                    { className: "col-md-10" },
-	                    _react2.default.createElement("input", { type: "text", placeholder: "Stock code", name: "stock-name", className: "form-control input-lg",
+	                    _react2.default.createElement("input", { type: "text", placeholder: "Stock code. For example AAPL, GOOGL and etc.", name: "stock-name", className: "form-control input-lg",
 	                        value: this.state.inputValue,
 	                        onChange: this.updateInput })
 	                ),
 	                _react2.default.createElement(
 	                    "div",
-	                    { className: "col-md-2" },
+	                    { className: "col-md-2 text-right" },
 	                    _react2.default.createElement(
 	                        "button",
 	                        { className: "btn btn-primary btn-lg", type: "button",
 	                            onClick: this.handleClick },
-	                        "Add stock"
+	                        "Add stock chart"
 	                    )
 	                )
 	            );
